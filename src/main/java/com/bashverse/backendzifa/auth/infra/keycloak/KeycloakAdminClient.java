@@ -9,6 +9,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -152,6 +153,56 @@ public class KeycloakAdminClient {
             }
         } else {
             throw new RuntimeException("Failed to refresh token: " + response.getStatusCode());
+        }
+    }
+
+    /**
+     * Find user by email using Keycloak Admin API
+     * Returns list of users matching email, usually only one expected
+     */
+    public List<Map<String, Object>> findUserByEmail(String email) {
+        String token = getAdminAccessToken();
+
+        String url = keycloakServerUrl + "/admin/realms/" + realm + "/users?email=" + email;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, entity, List.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response.getBody();
+        } else {
+            throw new RuntimeException("Failed to search user by email: " + response.getStatusCode());
+        }
+    }
+
+    /**
+     * Trigger password reset by setting UPDATE_PASSWORD required action on the user
+     */
+    public void triggerPasswordReset(String userId) {
+        String token = getAdminAccessToken();
+
+        String url = keycloakServerUrl + "/admin/realms/" + realm + "/users/" + userId;
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Required action for password reset
+        Map<String, Object> body = Map.of(
+                "enabled", true,  // keep user enabled
+                "requiredActions", List.of("UPDATE_PASSWORD")
+        );
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to trigger password reset: " + response.getStatusCode());
         }
     }
 }
