@@ -17,10 +17,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // disable CSRF for APIs
+                .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs (adjust if you have non-REST clients)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/register", "/auth/login", "/auth/refresh-token").permitAll() // allow public
-                        .anyRequest().authenticated() // everything else needs auth
+                        .requestMatchers("/auth/register", "/public/**").permitAll() // Allow unauthenticated access where needed
+                        .anyRequest().authenticated() // All other requests require authentication
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .jwt() // Enable JWT token validation, delegated to Spring Security OAuth2 Resource Server support
                 );
 
         return http.build();
@@ -31,4 +34,3 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
-

@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   mysql:
     image: mysql:8.0
@@ -9,9 +8,9 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - mysql_:/var/lib/mysql
 
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
@@ -24,6 +23,9 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
     ports:
       - "8081:8080"
+    volumes:
+      - keycloak_:/opt/keycloak/data
 
 volumes:
-  mysql_data:
+  mysql_:
+  keycloak_:

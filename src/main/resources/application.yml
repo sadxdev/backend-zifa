@@ -4,13 +4,34 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/zifa
+
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: #${REDIS_PASSWORD:} Use empty if no password is set
+      timeout: 60000ms
+      lettuce:
+        shutdown-timeout: 100ms       # Optional: graceful Lettuce shutdown
+      jedis:
+        pool:
+          max-active: 10              # Connection pool tuning
+          max-idle: 5
+          min-idle: 1
+          max-wait: 2000ms
+
 keycloak:
-  auth-server-url: http://localhost:8081
+  auth-server-url: http://localhost:8081/
   realm: ${KEYCLOAK_REALM}
   resource: ${KEYCLOAK_CLIENT_ID}
   credentials:
@@ -19,3 +40,5 @@ keycloak:
 logging:
   level:
     org.springframework.security: DEBUG
+
+
