@@ -19,7 +19,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs (adjust if you have non-REST clients)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/register","/auth/logout","/auth/refresh-token", "/public/**").permitAll() // Allow unauthenticated access where needed
+                        .requestMatchers("/auth/register","/auth/logout","/auth/refresh-token","/auth/forgot-password", "/public/**").permitAll() // Allow unauthenticated access where needed
                         .anyRequest().authenticated() // All other requests require authentication
                 )
                 .oauth2ResourceServer(oauth2 ->
