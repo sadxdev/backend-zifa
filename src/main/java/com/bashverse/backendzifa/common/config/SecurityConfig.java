@@ -19,11 +19,13 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable()) // Disable CSRF for APIs (adjust if you have non-REST clients)
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/auth/register", "/public/**").permitAll() // Allow unauthenticated access where needed
+                        .requestMatchers("/auth/register","/auth/logout", "/public/**").permitAll() // Allow unauthenticated access where needed
                         .anyRequest().authenticated() // All other requests require authentication
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt() // Enable JWT token validation, delegated to Spring Security OAuth2 Resource Server support
+                .oauth2ResourceServer(oauth2 ->
+                        oauth2.jwt(jwt -> {
+                            // Leave empty for default settings or add customizations here
+                        })
                 );
 
         return http.build();

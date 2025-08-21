@@ -100,4 +100,28 @@ public class KeycloakAdminClient {
             throw new RuntimeException("Failed to get admin access token: " + response.getStatusCode());
         }
     }
+
+    /**
+     * Logout user by revoking refresh token in Keycloak
+     */
+    public void logout(String refreshToken) {
+        String url = keycloakServerUrl + "/realms/" + realm + "/protocol/openid-connect/logout";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecret);
+        form.add("refresh_token", refreshToken);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(form, headers);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Logout from Keycloak failed with status: " + response.getStatusCode());
+        }
+    }
 }
+
