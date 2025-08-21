@@ -123,5 +123,36 @@ public class KeycloakAdminClient {
             throw new RuntimeException("Logout from Keycloak failed with status: " + response.getStatusCode());
         }
     }
+    /**
+     * Refresh access token using Keycloak refresh token endpoint.
+     * Accepts a refresh token and returns a new access token (and optionally a new refresh token).
+     */
+    public Map<String, Object> refreshToken(String refreshToken) {
+        String tokenUrl = keycloakServerUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        form.add("client_id", clientId);
+        form.add("client_secret", clientSecret);
+        form.add("grant_type", "refresh_token");
+        form.add("refresh_token", refreshToken);
+
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(form, headers);
+
+        ResponseEntity<Map> response = restTemplate.postForEntity(URI.create(tokenUrl), entity, Map.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            Map body = response.getBody();
+            if (body != null && body.containsKey("access_token")) {
+                return body;
+            } else {
+                throw new RuntimeException("Token refresh response missing access_token");
+            }
+        } else {
+            throw new RuntimeException("Failed to refresh token: " + response.getStatusCode());
+        }
+    }
 }
 
