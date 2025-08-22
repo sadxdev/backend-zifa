@@ -205,5 +205,30 @@ public class KeycloakAdminClient {
             throw new RuntimeException("Failed to trigger password reset: " + response.getStatusCode());
         }
     }
+
+    public void updateUserPassword(String userId, String newPassword) {
+        String token = getAdminAccessToken();
+
+        String url = keycloakServerUrl + "/admin/realms/" + realm + "/users/" + userId + "/reset-password";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        // Define credential payload for password reset
+        Map<String, Object> credentialPayload = Map.of(
+                "type", "password",
+                "value", newPassword,
+                "temporary", false // Set true if you want user to change password on next login
+        );
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(credentialPayload, headers);
+
+        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Failed to update user password: " + response.getStatusCode());
+        }
+    }
 }
 
